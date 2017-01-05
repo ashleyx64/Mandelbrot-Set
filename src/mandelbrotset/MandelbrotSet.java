@@ -8,8 +8,16 @@ package mandelbrotset;
 import java.io.File;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javax.imageio.ImageIO;
@@ -19,23 +27,68 @@ import javax.imageio.ImageIO;
  * @author Ashley
  */
 public class MandelbrotSet extends Application {
+
+    int width = 1000;
+    int height = 1000;
+    int res = 500;
     
     @Override
     public void start(Stage primaryStage) {
-        int width = 1000;
-        int height = 1000;
+        GridPane root = new GridPane();
+        root.setPadding(new Insets(10));
+        root.setHgap(5);
+        root.setVgap(5);
         
-        for (int i = 1; i < 1000; i *= 2) {
-            WritableImage wim = drawSet(width, height, i);
-
-            File file = new File("Mandelbrot Set " + width + "x" + height + " " + i + ".png");
-            try {
-                System.out.println("Writing file: " + file.getName());
-                ImageIO.write(SwingFXUtils.fromFXImage(wim, null), "png", file);
-            } catch (Exception s) {
-                System.out.println(s);
+        final Label widthLbl = new Label("Width:");
+        GridPane.setConstraints(widthLbl, 0, 0);
+        
+        final TextField widthTxtFld = new TextField(String.valueOf(width));
+        GridPane.setConstraints(widthTxtFld, 1, 0);
+        
+        final Label heightLbl =  new Label("Height:");
+        GridPane.setConstraints(heightLbl, 0, 1);
+        
+        final TextField heightTxtFld = new TextField(String.valueOf(height));
+        GridPane.setConstraints(heightTxtFld, 1, 1);
+        
+        final Label resLbl = new Label("Resolution");
+        GridPane.setConstraints(resLbl, 0, 2);
+        
+        final TextField resTxtFld = new TextField(String.valueOf(res));
+        GridPane.setConstraints(resTxtFld, 1, 2);
+        
+        final Button confirmBtn = new Button("Confirm");
+        GridPane.setConstraints(confirmBtn, 0, 3, 1, 2);
+        
+        confirmBtn.setOnAction(new EventHandler<ActionEvent>() {
+            
+            @Override
+            public void handle(ActionEvent e) {
+                width = Integer.parseInt(widthTxtFld.getText());
+                height = Integer.parseInt(heightTxtFld.getText());
+                res = Integer.parseInt(resTxtFld.getText());
+                writeImage(width, height, res);
             }
-        }
+        });
+        
+        root.getChildren().addAll(widthLbl, widthTxtFld, heightLbl, heightTxtFld, resLbl, resTxtFld, confirmBtn);
+        
+        Scene scene = new Scene(root);
+        
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+    
+    private static void writeImage(int width, int height, int res) {        
+        WritableImage wim = drawSet(width, height, res);
+
+        File file = new File("Mandelbrot Set " + width + "x" + height + " " + res + ".png");
+        try {
+            System.out.println("Writing file: " + file.getName());
+            ImageIO.write(SwingFXUtils.fromFXImage(wim, null), "png", file);
+        } catch (Exception s) {
+            System.out.println(s);
+        }                
     }
 
     private static WritableImage drawSet(int width, int height, int resolution) {
