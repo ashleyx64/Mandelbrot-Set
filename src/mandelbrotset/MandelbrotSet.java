@@ -5,22 +5,21 @@
  */
 package mandelbrotset;
 
-import java.io.File;
 import javafx.application.Application;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javax.imageio.ImageIO;
 
 /**
  *
@@ -33,7 +32,7 @@ public class MandelbrotSet extends Application {
     int res = 32;
     
     @Override
-    public void start(Stage primaryStage) {
+    public void start(final Stage primaryStage) {
         GridPane root = new GridPane();
         root.setPadding(new Insets(10));
         root.setHgap(5);
@@ -64,10 +63,22 @@ public class MandelbrotSet extends Application {
             
             @Override
             public void handle(ActionEvent e) {
+                primaryStage.hide();                
                 width = Integer.parseInt(widthTxtFld.getText());
                 height = Integer.parseInt(heightTxtFld.getText());
                 res = Integer.parseInt(resTxtFld.getText());
-                writeImage(width, height, res);
+                
+                Canvas displayCanvas = new Canvas(width, height);
+                StackPane displayRoot = new StackPane(displayCanvas);
+                displayRoot.setAlignment(Pos.CENTER);
+                Scene displayScene = new Scene(displayRoot, Color.BLACK);
+                Stage displayStage = new Stage();
+                displayStage.setScene(displayScene);
+               
+                drawImage(width, height, res, displayCanvas.getGraphicsContext2D().getPixelWriter());
+                
+                displayStage.setMaximized(true);
+                displayStage.show();
             }
         });
         
@@ -78,22 +89,8 @@ public class MandelbrotSet extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-    
-    private static void writeImage(int width, int height, int res) {        
-        WritableImage wim = drawSet(width, height, res);
 
-        File file = new File("Mandelbrot Set " + width + "x" + height + " " + res + ".png");
-        try {
-            System.out.println("Writing file: " + file.getName());
-            ImageIO.write(SwingFXUtils.fromFXImage(wim, null), "png", file);
-        } catch (Exception s) {
-            System.out.println(s);
-        }                
-    }
-
-    private static WritableImage drawSet(int width, int height, int resolution) {
-        WritableImage wim = new WritableImage(width, height);
-        PixelWriter pw = wim.getPixelWriter();
+    private static void drawImage(int width, int height, int resolution, PixelWriter pixelWriter) {
         double xScale = width / 3.5;
         double yScale = height / 2;
         for (int Px = 0; Px < width; Px++) {
@@ -110,10 +107,9 @@ public class MandelbrotSet extends Application {
                     x = xTemp;
                     iteration++;
                 }
-                pw.setColor(Px, Py, getColor(iteration, maxIteration));
+                pixelWriter.setColor(Px, Py, getColor(iteration, maxIteration));
             }
         }
-        return wim;
     }
     
     private static Color getColor(int iteration, int maxIteration) {
