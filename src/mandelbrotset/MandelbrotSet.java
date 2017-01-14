@@ -28,9 +28,9 @@ import javax.imageio.ImageIO;
  */
 public class MandelbrotSet extends Application {
 
-    int width = 1000;
-    int height = 1000;
-    int res = 500;
+    int width = 1980;
+    int height = 1200;
+    int res = 32;
     
     @Override
     public void start(Stage primaryStage) {
@@ -110,23 +110,30 @@ public class MandelbrotSet extends Application {
                     x = xTemp;
                     iteration++;
                 }
-                Color c = Color.WHITE;
-                double oneThird = maxIteration / 3.0;
-                if (iteration < oneThird) {
-                    c = Color.color(iteration / oneThird, 0, 0);
-                } else if (iteration < oneThird * 2.0) {
-                    c = Color.color(0, (iteration - oneThird) / oneThird, 0);
-                } else if (iteration < maxIteration) {
-                    c = Color.color(0, 0, (iteration - oneThird * 2) / oneThird);
-                } else if (iteration == maxIteration) {
-                    c = Color.BLACK;
-                } else {
-                    System.err.println("ERROR: Invalid value for iteration");
-                }
-                pw.setColor(Px, Py, c);
+                pw.setColor(Px, Py, getColor(iteration, maxIteration));
             }
         }
         return wim;
+    }
+    
+    private static Color getColor(int iteration, int maxIteration) {
+        Color c = Color.WHITE;
+        double oneThird = maxIteration / 3.0;
+        if (iteration < oneThird) {
+            double calc = iteration / oneThird;
+            c = Color.color(0, 0, calc);
+        } else if (iteration < oneThird * 2.0) {
+            double calc = (iteration - oneThird) / oneThird;
+            c = Color.color(0, calc, 1);
+        } else if (iteration < maxIteration) {
+            double calc = (iteration - oneThird * 2) / oneThird;
+            c = Color.color(calc, 1, 1);
+        } else if (iteration == maxIteration) {
+            c = Color.BLACK;
+        } else {
+            System.err.println("ERROR: Invalid value for iteration");
+        }
+        return c;
     }
 
     /**
